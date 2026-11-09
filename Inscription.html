@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="dark light">
+<title>Connexion — Lirea</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+    --primary-color: #1F6FEB;
+    --accent-color: #FF7A1A;
+    --bg-color: #0B1020;
+    --text-gray: #8A93AB;
+    --glass-bg: rgba(20, 27, 45, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.15);
+}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-tap-highlight-color:transparent; }
+body { background-color: var(--bg-color); color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+.bg-image-login { position: absolute; inset: 0; background-image: url('https://i.ibb.co/mrbBzRFp/file-00000000eef482439e65ca54c09d5eaa.png'); background-size: cover; background-position: center top; background-repeat: no-repeat; z-index: 0; }
+.bg-gradient-login { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,16,32,0.95) 0%, rgba(11,16,32,0.7) 30%, transparent 60%); z-index: 0; }
+
+#authView { flex: 1; display: flex; flex-direction: column; padding: 0 24px 30px; position: relative; z-index: 1; justify-content: flex-end; }
+
+.btn-google { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 8px 8px 20px; background: #FFFFFF; border: none; border-radius: 40px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: transform 0.2s, opacity 0.2s; margin-bottom: 20px; }
+.btn-google:active { transform: scale(0.97); }
+.btn-google:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
+.google-content { display: flex; align-items: center; gap: 15px; }
+.google-icon { width: 26px; height: 26px; }
+.google-text { font-size: 16px; font-weight: 700; color: #131A2B; }
+.google-arrow { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #131A2B; font-size: 18px; }
+
+.separator { display: flex; align-items: center; text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+.separator::before, .separator::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+.separator::before { margin-right: 15px; }
+.separator::after { margin-left: 15px; }
+
+.terms-container { display: flex; align-items: flex-start; justify-content: center; gap: 10px; text-align: left; padding: 0 10px; }
+.terms-container input[type="checkbox"] { appearance: none; width: 22px; height: 22px; border: 2px solid rgba(255,255,255,0.4); border-radius: 6px; cursor: pointer; flex-shrink: 0; margin-top: 2px; position: relative; background: rgba(0,0,0,0.3); }
+.terms-container input[type="checkbox"]:checked { background: var(--primary-color); border-color: var(--primary-color); }
+.terms-container input[type="checkbox"]:checked::after { content: '\f00c'; font-family: 'FontAwesome'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 12px; }
+.terms-text { font-size: 12.5px; color: rgba(255, 255, 255, 0.7); font-weight: 500; line-height: 1.5; }
+.terms-text a { color: #5CA3FF; font-weight: 700; text-decoration: none; cursor: pointer; }
+
+#paymentView { display: none; position: absolute; inset: 0; z-index: 10; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.bg-image-payment { position: absolute; inset: 0; background-image: url('https://i.ibb.co/gL81S8jr/file-000000001a6481f4a34a83d8944be52f.png'); background-size: cover; background-position: center top; z-index: 0; }
+.bg-overlay-payment { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,16,32,0.9) 0%, transparent 20%); z-index: 0; }
+
+.bottom-nav-payment { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom)); left: 16px; right: 16px; max-width: 400px; margin: 0 auto; background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 30px; padding: 8px; display: flex; gap: 8px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.4); animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.3, 1); }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+.btn-pay, .btn-skip { flex: 1; padding: 14px 8px; border-radius: 22px; font-size: 12.5px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.2s, opacity 0.2s; }
+.btn-pay { background: var(--accent-color); color: #fff; box-shadow: 0 4px 12px rgba(255, 122, 26, 0.3); }
+.btn-pay:active { transform: scale(0.95); }
+.btn-pay:disabled { opacity: 0.7; cursor: not-allowed; }
+.btn-skip { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); }
+.btn-skip:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.2); }
+.btn-skip:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 9999; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-content { background: #141B2D; border: 1px solid #232C44; border-radius: 20px; padding: 24px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; color: #fff; position: relative; transform: translateY(20px); transition: transform 0.3s; }
+.modal-overlay.active .modal-content { transform: none; }
+.modal-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; color: #fff; cursor: pointer; }
+.modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+.modal-text { font-size: 13.5px; color: var(--text-gray); line-height: 1.6; }
+.modal-text h4 { color: #fff; margin: 12px 0 6px; font-weight: 800; }
+
+.loader { width: 24px; height: 24px; border: 3px solid rgba(0,0,0,0.1); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; display: none; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<div class="bg-image-login"></div>
+<div class="bg-gradient-login"></div>
+
+<div id="authView">
+    <button class="btn-google" id="btnGoogle" onclick="handleGoogleLogin()" disabled>
+        <div class="google-content">
+            <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+            <span class="google-text">Se connecter avec Google</span>
+        </div>
+        <div class="google-arrow" id="btnIcon">
+            <i class="fa-solid fa-arrow-right"></i>
+        </div>
+        <div class="loader" id="btnLoader" style="margin-right: 12px;"></div>
+    </button>
+
+    <div class="separator">Ou</div>
+
+    <div class="terms-container">
+        <input type="checkbox" id="termsCheck" onchange="toggleGoogleBtn()">
+        <label class="terms-text" for="termsCheck">
+            En vous connectant, vous acceptez nos <a onclick="openModal('cgu')">Conditions d'utilisation</a> et notre <a onclick="openModal('privacy')">Politique de confidentialité</a>.
+        </label>
+    </div>
+</div>
+
+<div id="paymentView">
+    <div class="bg-image-payment"></div>
+    <div class="bg-overlay-payment"></div>
+    <div class="bottom-nav-payment">
+        <button class="btn-pay" id="btnPay" onclick="activatePayment()">
+            <i class="fa-solid fa-credit-card"></i> Payer
+        </button>
+        <button class="btn-skip" id="btnSkip" onclick="skipPayment()">
+            Plus tard
+        </button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-cgu" onclick="if(event.target===this)closeModal('cgu')">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('cgu')"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-title">Conditions Générales d'Utilisation</div>
+        <div class="modal-text">
+            <h4>1. Acceptation des conditions</h4>
+            <p>En utilisant l'application Lirea, vous acceptez les présentes conditions. L'accès se fait via un compte Google.</p>
+            <h4>2. Collecte de données</h4>
+            <p>Une adresse IP est automatiquement collectée à des fins de sécurité et de statistiques pour l'administrateur.</p>
+            <h4>3. Abonnement</h4>
+            <p>L'accès complet nécessite un paiement de 1 000 F. Vous pouvez choisir de passer cette étape, mais certaines fonctionnalités seront restreintes.</p>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-privacy" onclick="if(event.target===this)closeModal('privacy')">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('privacy')"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-title">Politique de Confidentialité</div>
+        <div class="modal-text">
+            <h4>1. Données collectées</h4>
+            <p>Nous collectons votre adresse IP, votre nom et email Google, ainsi que vos préférences de lecture.</p>
+            <h4>2. Utilisation</h4>
+            <p>Vos données sont utilisées pour vous fournir un accès personnalisé et ne sont jamais revendues à des tiers.</p>
+            <h4>3. Vos droits</h4>
+            <p>Vous pouvez demander la suppression de vos données à tout moment.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://lixoulvrhakkjdmqcwic.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_ba7q7u0rpwXAwNe6muG00Q_wshutrCW'; 
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function toggleGoogleBtn() { document.getElementById('btnGoogle').disabled = !document.getElementById('termsCheck').checked; }
+function openModal(id) { document.getElementById('modal-' + id).classList.add('active'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('active'); }
+
+async function handleGoogleLogin() {
+    const btn = document.getElementById('btnGoogle');
+    const loader = document.getElementById('btnLoader');
+    const btnText = btn.querySelector('.google-text');
+    const btnIcon = document.getElementById('btnIcon');
+
+    btnText.textContent = "Connexion en cours...";
+    btnIcon.style.display = 'none';
+    loader.style.display = 'block';
+    btn.disabled = true;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: 'https://updatezone-gif.github.io/lirea_/index.html',
+            queryParams: { prompt: 'select_account' }
+        }
+    });
+
+    if (error) {
+        alert("Erreur de connexion : " + error.message);
+        btnText.textContent = "Se connecter avec Google";
+        btnIcon.style.display = 'flex';
+        loader.style.display = 'none';
+        btn.disabled = false;
+    }
+}
+
+async function activatePayment() {
+    const btnPay = document.getElementById('btnPay');
+    const btnSkip = document.getElementById('btnSkip');
+    
+    btnPay.innerHTML = '<span class="spinner"></span> Patientez...';
+    btnPay.disabled = true;
+    btnSkip.disabled = true;
+
+    try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (!session) throw new Error("Utilisateur non connecté");
+
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/create-jeko-checkout`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur lors de l'initialisation du paiement");
+
+        if (data.payment_url || data.checkout_url || data.url) {
+            window.location.href = data.payment_url || data.checkout_url || data.url;
+        } else {
+            console.log("Réponse Jeko:", data);
+            throw new Error("L'URL de paiement n'a pas été reçue de Jeko.");
+        }
+    } catch (err) {
+        alert(err.message);
+        btnPay.innerHTML = '<i class="fa-solid fa-credit-card"></i> Payer';
+        btnPay.disabled = false;
+        btnSkip.disabled = false;
+    }
+}
+
+function skipPayment() {
+    const btnSkip = document.getElementById('btnSkip');
+    btnSkip.innerHTML = 'Patientez...';
+    btnSkip.disabled = true;
+    window.location.href = 'index.html';
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+        const { data: profile } = await supabase.from('profiles').select('subscription_active').eq('id', session.user.id).single();
+        if (profile?.subscription_active) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('authView').style.display = 'none';
+            document.getElementById('paymentView').style.display = 'block';
+        }
+    }
+});
+</script>
+</body>
+</html>
