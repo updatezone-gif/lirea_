@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="dark light">
+<title>Chargement — Lirea</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+    --primary-color: #1F6FEB;
+    --accent-color: #FF7A1A;
+    --bg-color: #0B1020;
+    --text-gray: #8A93AB;
+    --glass-bg: rgba(20, 27, 45, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.15);
+}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-tap-highlight-color:transparent; }
+body { background-color: var(--bg-color); color: #fff; height: 100vh; overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 40px; }
+.bg-image { position: absolute; inset: 0; background-image: url('https://i.ibb.co/gMkr5Bmx/file-00000000cd0c81f4997f5bd8e3fb1b2d.png'); background-size: cover; background-position: center center; background-repeat: no-repeat; z-index: 0; }
+.bg-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,16,32,0.8) 0%, transparent 25%); z-index: 0; }
+.loading-container { position: relative; z-index: 10; width: calc(100% - 32px); max-width: 400px; margin: 0 auto; background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 30px; padding: 16px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 12px; animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.3, 1); }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.loading-text { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: #fff; }
+.loading-text span { color: var(--accent-color); font-weight: 800; }
+.progress-track { width: 100%; height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 5px; overflow: hidden; position: relative; }
+.progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); border-radius: 5px; transition: width 0.3s ease; box-shadow: 0 0 10px rgba(255, 122, 26, 0.5); }
+</style>
+</head>
+<body>
+
+<div class="bg-image"></div>
+<div class="bg-overlay"></div>
+
+<div class="loading-container">
+    <div class="loading-text">
+        <span>Chargement de Lirea...</span>
+        <span id="progressPercent">0%</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressBar"></div>
+    </div>
+</div>
+
+<!-- SDK SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // Configuration Supabase
+    const SUPABASE_URL = 'https://lixoulvrhakkjdmqcwic.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_ba7q7u0rpwXAwNe6muG00Q_wshutrCW'; 
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let progress = 0;
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+
+    // Animation de la barre de chargement
+    const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 10) + 5;
+        if (progress > 90) progress = 90; // On bloque à 90% le temps de vérifier la connexion
+        
+        progressBar.style.width = progress + '%';
+        progressPercent.textContent = progress + '%';
+    }, 100);
+
+    // Le "Cerveau" : Vérification de la session
+    async function checkSessionAndRedirect() {
+        try {
+            // On demande à Supabase si l'utilisateur a un token de connexion valide
+            const { data: { session } } = await supabase.auth.getSession();
+
+            // On laisse un petit délai artificiel (500ms) pour que l'animation soit jolie
+            setTimeout(() => {
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+
+                setTimeout(() => {
+                    if (session) {
+                        // Connecté -> Dashboard
+                        window.location.replace('index.html');
+                    } else {
+                        // Pas connecté -> Page de Login
+                        window.location.replace('Inscription.html');
+                    }
+                }, 300); // Petit délai après 100%
+            }, 500);
+
+        } catch (error) {
+            console.error("Erreur de session:", error);
+            // En cas d'erreur, on renvoie vers l'inscription par sécurité
+            window.location.replace('Inscription.html');
+        }
+    }
+
+    // Lancer la vérification au chargement de la page
+    window.addEventListener('DOMContentLoaded', checkSessionAndRedirect);
+</script>
+</body>
+</html>
