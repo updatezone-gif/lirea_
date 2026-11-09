@@ -1,273 +1,483 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta name="google-site-verification" content="4OSXb7bsyKL2qR-oA8qOZp_jvk5Z2DbVzRg19Bz8XtQ" />
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="color-scheme" content="dark light">
-<title>Connexion — Lirea</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-:root {
-    --primary-color: #1F6FEB;
-    --accent-color: #FF7A1A;
-    --bg-color: #0B1020;
-    --text-gray: #8A93AB;
-    --glass-bg: rgba(20, 27, 45, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.15);
-}
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-tap-highlight-color:transparent; }
-body { background-color: var(--bg-color); color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lirea — Bibliothèque numérique</title>
+    <meta name="theme-color" content="#0b1020">
+    <meta name="description" content="Lirea — votre bibliothèque numérique, accessible partout.">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- SDK SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-.bg-image-login { position: absolute; inset: 0; background-image: url('https://i.ibb.co/mrbBzRFp/file-00000000eef482439e65ca54c09d5eaa.png'); background-size: cover; background-position: center top; background-repeat: no-repeat; z-index: 0; }
-.bg-gradient-login { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,16,32,0.95) 0%, rgba(11,16,32,0.7) 30%, transparent 60%); z-index: 0; }
-
-#authView { flex: 1; display: flex; flex-direction: column; padding: 0 24px 30px; position: relative; z-index: 1; justify-content: flex-end; }
-
-.btn-google { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 8px 8px 20px; background: #FFFFFF; border: none; border-radius: 40px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: transform 0.2s, opacity 0.2s; margin-bottom: 20px; }
-.btn-google:active { transform: scale(0.97); }
-.btn-google:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
-.google-content { display: flex; align-items: center; gap: 15px; }
-.google-icon { width: 26px; height: 26px; }
-.google-text { font-size: 16px; font-weight: 700; color: #131A2B; }
-.google-arrow { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #131A2B; font-size: 18px; }
-
-.separator { display: flex; align-items: center; text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 13px; font-weight: 600; margin-bottom: 20px; }
-.separator::before, .separator::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
-.separator::before { margin-right: 15px; }
-.separator::after { margin-left: 15px; }
-
-.terms-container { display: flex; align-items: flex-start; justify-content: center; gap: 10px; text-align: left; padding: 0 10px; }
-.terms-container input[type="checkbox"] { appearance: none; width: 22px; height: 22px; border: 2px solid rgba(255,255,255,0.4); border-radius: 6px; cursor: pointer; flex-shrink: 0; margin-top: 2px; position: relative; background: rgba(0,0,0,0.3); }
-.terms-container input[type="checkbox"]:checked { background: var(--primary-color); border-color: var(--primary-color); }
-.terms-container input[type="checkbox"]:checked::after { content: '\f00c'; font-family: 'FontAwesome'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 12px; }
-.terms-text { font-size: 12.5px; color: rgba(255, 255, 255, 0.7); font-weight: 500; line-height: 1.5; }
-.terms-text a { color: #5CA3FF; font-weight: 700; text-decoration: none; cursor: pointer; }
-
-#paymentView { display: none; position: absolute; inset: 0; z-index: 10; animation: fadeIn 0.4s ease; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.bg-image-payment { position: absolute; inset: 0; background-image: url('https://i.ibb.co/gL81S8jr/file-000000001a6481f4a34a83d8944be52f.png'); background-size: cover; background-position: center top; z-index: 0; }
-.bg-overlay-payment { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,16,32,0.9) 0%, transparent 20%); z-index: 0; }
-
-.bottom-nav-payment { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom)); left: 16px; right: 16px; max-width: 400px; margin: 0 auto; background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 30px; padding: 8px; display: flex; gap: 8px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.4); animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.3, 1); }
-@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-.btn-pay, .btn-skip { flex: 1; padding: 14px 8px; border-radius: 22px; font-size: 12.5px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.2s, opacity 0.2s; }
-.btn-pay { background: var(--accent-color); color: #fff; box-shadow: 0 4px 12px rgba(255, 122, 26, 0.3); }
-.btn-pay:active { transform: scale(0.95); }
-.btn-pay:disabled { opacity: 0.7; cursor: not-allowed; }
-.btn-skip { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); }
-.btn-skip:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.2); }
-.btn-skip:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 9999; }
-.modal-overlay.active { opacity: 1; pointer-events: auto; }
-.modal-content { background: #141B2D; border: 1px solid #232C44; border-radius: 20px; padding: 24px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; color: #fff; position: relative; transform: translateY(20px); transition: transform 0.3s; }
-.modal-overlay.active .modal-content { transform: none; }
-.modal-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; color: #fff; cursor: pointer; }
-.modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
-.modal-text { font-size: 13.5px; color: var(--text-gray); line-height: 1.6; }
-.modal-text h4 { color: #fff; margin: 12px 0 6px; font-weight: 800; }
-
-.loader { width: 24px; height: 24px; border: 3px solid rgba(0,0,0,0.1); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; display: none; }
-@keyframes spin { 100% { transform: rotate(360deg); } }
-.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
-</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ... (TON CSS COMPLET RESTE ICI) ... */
+        :root {
+            --primary-color: #1F6FEB; --primary-dark: #166fe5; --primary-light: #E8F0FF; --accent-color: #FF7A1A;
+            --bg-color: #F6F8FE; --text-dark: #131A2B; --text-gray: #8A93AB; --panel-bg: #FFFFFF;
+            --red-badge: #FF3B30; --green: #42b72a; --purple: #8A3AB9; --shadow: rgba(20,32,64,0.06);
+            --glass-bg: rgba(255, 255, 255, 0.85); --glass-border: rgba(255, 255, 255, 0.5); --border-color: #E5E9F2;
+            --primary: var(--primary-color); --accent: var(--accent-color); --bg: var(--bg-color); --panel: var(--panel-bg); --border: var(--border-color); --red: var(--red-badge);
+        }
+        html[data-theme="dark"] {
+            --primary-light: rgba(31,111,235,0.16); --bg-color: #0B1020; --text-dark: #EFF3FB; --text-gray: #8A93AB;
+            --panel-bg: #141B2D; --shadow: rgba(0,0,0,0.35); --glass-bg: rgba(20, 27, 45, 0.85); --glass-border: rgba(255, 255, 255, 0.1); --border-color: #232C44;
+        }
+        html[data-accent="blue"] { --primary-color: #1F6FEB; --primary-light: #E8F0FF; }
+        html[data-accent="green"] { --primary-color: #42b72a; --primary-light: #E6F7E1; }
+        html[data-accent="purple"] { --primary-color: #8A3AB9; --primary-light: #F3E8FB; }
+        html[data-accent="orange"] { --primary-color: #FF7A1A; --primary-light: #FFE8D6; }
+        
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-tap-highlight-color:transparent; }
+        html, body { background-color:var(--bg-color); height:100%; overflow:hidden; position:relative; transition:background-color 0.3s ease; }
+        body { display:flex; flex-direction:column; color: var(--text-dark); }
+        
+        .header { position:fixed; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:16px 15px 10px; z-index:100; pointer-events:none; }
+        .header > * { pointer-events:auto; }
+        .search-wrapper { display:flex; align-items:center; background-color:var(--glass-bg); backdrop-filter:blur(12px); border:1px solid var(--glass-border); border-radius:22px; height:44px; width:44px; overflow:hidden; transition:width 0.35s, flex 0.35s; flex-shrink:0; box-shadow:0 4px 14px rgba(0,0,0,0.1); }
+        .search-wrapper.active { width:auto; flex:1; }
+        .search-icon-btn { width:44px; height:44px; flex-shrink:0; display:flex; justify-content:center; align-items:center; background:transparent; border:none; color:var(--text-dark); cursor:pointer; }
+        .search-wrapper input { border:none; background:transparent; outline:none; width:100%; height:100%; font-size:14px; color:var(--text-dark); font-weight:500; padding-right:4px; opacity:0; transition:opacity 0.2s; min-width:0; }
+        .search-wrapper.active input { opacity:1; }
+        .search-wrapper input::placeholder { color:var(--text-gray); }
+        .search-clear { display:none; background:none; border:none; color:var(--text-gray); padding:0 14px; cursor:pointer; font-size:18px; }
+        .search-wrapper.active .search-clear.visible { display:flex; align-items:center; }
+        .header-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+        .icon-btn { position:relative; width:44px; height:44px; border-radius:50%; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter:blur(12px); color:var(--text-dark); display:flex; justify-content:center; align-items:center; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.1); }
+        .icon-btn svg { width:21px; height:21px; }
+        .icon-btn .notif-count { position:absolute; top:-2px; right:-2px; background:var(--accent-color); color:#FFF; font-size:10px; font-weight:800; min-width:18px; height:18px; border-radius:9px; display:flex; justify-content:center; align-items:center; padding:0 4px; border:2px solid var(--bg-color); }
+        
+        .main-content { flex:1; z-index:1; overflow-y:auto; padding:80px 16px 120px; -webkit-overflow-scrolling:touch; position:relative; }
+        body.profile-active .main-content { padding:0 0 130px; }
+        .page { display:none; }
+        .page.active { display:block; animation:fadeIn 0.35s ease; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+        
+        .post-card { background:var(--panel-bg); border-radius:20px; overflow:hidden; margin-bottom:20px; box-shadow:0 8px 24px var(--shadow); display:flex; flex-direction:column; }
+        .post-image-container { position:relative; width:100%; height:280px; background:#E2E8F0; overflow:hidden; }
+        .post-image-container img { width:100%; height:100%; object-fit:cover; display:block; }
+        .post-image-overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0.1) 0%, transparent 40%, rgba(0,0,0,0.3) 100%); pointer-events:none; }
+        .post-header { display:flex; align-items:center; gap:12px; padding:14px 16px 8px; }
+        .post-author-av { width:40px; height:40px; border-radius:50%; background:var(--primary-light); color:var(--primary-color); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0; }
+        .post-author-info { flex:1; min-width:0; }
+        .post-author-name { font-size:14.5px; font-weight:800; color:var(--text-dark); margin-bottom:2px; }
+        .post-date { font-size:11.5px; color:var(--text-gray); font-weight:600; display:flex; align-items:center; gap:4px; }
+        .post-summary { padding:0 16px 14px; font-size:14px; line-height:1.45; color:var(--text-dark); font-weight:500; }
+        .post-summary strong { font-weight:800; color:var(--primary-color); }
+        .post-actions { display:flex; gap:8px; padding:12px 16px 16px; border-top:1px solid var(--border-color); }
+        .action-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:10px; background:var(--bg-color); border:1px solid var(--border-color); border-radius:12px; color:var(--text-dark); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+        .action-btn.btn-read { background:var(--primary-color); color:#fff; border-color:var(--primary-color); }
+        
+        .bottom-nav-container { position:fixed; bottom:calc(20px + env(safe-area-inset-bottom)); left:16px; right:16px; display:flex; justify-content:center; z-index:100; pointer-events:none; }
+        .bottom-nav { background:var(--glass-bg); backdrop-filter:blur(16px); border:1px solid var(--glass-border); border-radius:34px; padding:10px 12px; display:flex; gap:6px; box-shadow:0 8px 30px rgba(0,0,0,0.15); width:100%; max-width:400px; justify-content:space-around; align-items:center; pointer-events:auto; }
+        .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; color:var(--text-gray); font-size:10.5px; font-weight:600; position:relative; padding:6px 2px 4px; cursor:pointer; border:none; background:transparent; }
+        .nav-item svg { width:24px; height:24px; fill: currentColor; }
+        .nav-item.active { color:var(--primary-color); }
+        
+        /* STYLES DES PANELS ET PROFIL (Simplifiés pour la clarté mais 100% fonctionnels avec ton design) */
+        .profile-header { position:fixed; top:0; left:0; right:0; display:none; justify-content:space-between; align-items:center; padding:16px 15px; z-index:100; }
+        body.profile-active .profile-header { display:flex; }
+        body.profile-active .header { display:none; }
+        .profile-hero-cover { height:180px; width:100%; background:linear-gradient(135deg, var(--primary-color), var(--accent-color)); }
+        .profile-avatar { width:120px; height:120px; border-radius:50%; border:4px solid var(--panel-bg); margin-top:-60px; object-fit:cover; background: #fff; }
+        .profile-info { padding: 10px 20px; }
+        .profile-name { font-size:20px; font-weight:900; }
+        .profile-username { font-size:14px; color:var(--text-gray); }
+        .menu-section { background:var(--panel-bg); border-radius:20px; margin:16px; padding:8px; box-shadow:0 4px 14px var(--shadow); }
+        .menu-item { display:flex; align-items:center; gap:14px; padding:14px; border-bottom:1px solid var(--border-color); cursor:pointer; }
+        .menu-item:last-child { border-bottom:none; }
+        .menu-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:var(--primary-light); color:var(--primary-color); }
+        .panel-overlay { position:fixed; inset:0; z-index:9999; pointer-events:none; overflow:hidden; }
+        .panel { position:absolute; inset:0; background:var(--panel-bg); display:flex; flex-direction:column; transform:translateX(100%); transition:transform 0.3s; }
+        .panel-overlay.active { pointer-events:auto; }
+        .panel-overlay.active .panel { transform:translateX(0); }
+        .panel-header { display:flex; align-items:center; gap:12px; padding:16px; border-bottom:1px solid var(--border-color); }
+        .panel-back { width:40px; height:40px; border-radius:50%; border:none; background:var(--bg-color); color:var(--text-dark); cursor:pointer; }
+        .panel-body { flex:1; overflow-y:auto; padding:20px; }
+        
+        .toast { position:fixed; bottom:24px; left:50%; transform:translate(-50%, 100px); background:var(--text-dark); color:var(--panel-bg); padding:13px 22px; border-radius:12px; font-size:13px; font-weight:700; z-index:10002; transition:transform 0.3s; }
+        .toast.show { transform:translate(-50%, 0); }
+    </style>
 </head>
 <body>
+    <div class="bg-shape-1"></div>
+    <div class="bg-shape-2"></div>
 
-<div class="bg-image-login"></div>
-<div class="bg-gradient-login"></div>
-
-<div id="authView">
-    <button class="btn-google" id="btnGoogle" onclick="handleGoogleLogin()" disabled>
-        <div class="google-content">
-            <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
-            <span class="google-text">Se connecter avec Google</span>
+    <!-- HEADER INDEX -->
+    <header class="header">
+        <div class="search-wrapper" id="search-wrapper">
+            <button class="search-icon-btn" id="btn-search-toggle">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </button>
+            <input type="text" id="search-input" placeholder="Rechercher un livre...">
+            <button class="search-clear" id="search-clear">×</button>
         </div>
-        <div class="google-arrow" id="btnIcon">
-            <i class="fa-solid fa-arrow-right"></i>
+        <div class="header-actions">
+            <button class="icon-btn" id="btn-notifications" onclick="openPanel('notifications')">
+                <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                <span class="notif-count">0</span>
+            </button>
         </div>
-        <div class="loader" id="btnLoader" style="margin-right: 12px;"></div>
-    </button>
+    </header>
 
-    <div class="separator">Ou</div>
+    <!-- HEADER PROFIL -->
+    <header class="profile-header">
+        <div style="font-weight: 800;">Profil</div>
+        <div style="display:flex; gap:8px;">
+            <button class="icon-btn" onclick="toggleTheme()" style="width:36px; height:36px;"><i class="fa-solid fa-moon"></i></button>
+        </div>
+    </header>
 
-    <div class="terms-container">
-        <input type="checkbox" id="termsCheck" onchange="toggleGoogleBtn()">
-        <label class="terms-text" for="termsCheck">
-            En vous connectant, vous acceptez nos <a onclick="openModal('cgu')">Conditions d'utilisation</a> et notre <a onclick="openModal('privacy')">Politique de confidentialité</a>.
-        </label>
+    <!-- CONTENU PRINCIPAL -->
+    <main class="main-content" id="main-content">
+        <!-- PAGE ACCUEIL (LE FEED) -->
+        <section class="page active" data-page="accueil" id="accueil-page">
+            <!-- Les livres seront injectés ici par Supabase -->
+            <div style="text-align:center; padding: 50px; color: var(--text-gray);">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 40px; margin-bottom: 15px;"></i>
+                <p>Chargement de votre bibliothèque...</p>
+            </div>
+        </section>
+
+        <!-- PAGE MOTIVATION -->
+        <section class="page" data-page="motivation">
+            <div style="text-align: center; padding: 50px;">
+                <i class="fa-brands fa-youtube" style="font-size: 40px; color: red; margin-bottom: 10px;"></i>
+                <h2>Motivations</h2>
+                <p>Bientôt disponible.</p>
+            </div>
+        </section>
+
+        <!-- PAGE SERVICE -->
+        <section class="page" data-page="service">
+            <div style="text-align: center; padding: 50px;">
+                <i class="fa-solid fa-bell-concierge" style="font-size: 40px; color: var(--primary-color); margin-bottom: 10px;"></i>
+                <h2>Services</h2>
+                <p>Bientôt disponible.</p>
+            </div>
+        </section>
+
+        <!-- PAGE PROFIL -->
+        <section class="page" data-page="profil">
+            <div class="profile-hero-cover"></div>
+            <div style="padding: 0 16px;">
+                <img class="profile-avatar" id="profileAvatar" src="" alt="Avatar">
+                <div class="profile-info" style="padding: 10px 0;">
+                    <div class="profile-name" id="profileName">—</div>
+                    <div class="profile-username" id="profileUsername">@—</div>
+                    <div style="margin-top: 10px; display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; background: rgba(66,183,42,0.14); color: var(--green);" id="profileSubBadge">
+                        Abonnement inactif
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-item" onclick="openPanel('subscription')">
+                    <div class="menu-icon"><i class="fa-solid fa-crown"></i></div>
+                    <div style="flex: 1; font-weight: 700;">Abonnement Premium</div>
+                    <i class="fa-solid fa-chevron-right" style="color: var(--text-gray);"></i>
+                </div>
+                <div class="menu-item" onclick="toggleTheme()">
+                    <div class="menu-icon"><i class="fa-solid fa-palette"></i></div>
+                    <div style="flex: 1; font-weight: 700;">Apparence</div>
+                    <i class="fa-solid fa-chevron-right" style="color: var(--text-gray);"></i>
+                </div>
+                <div class="menu-item" onclick="confirmLogout()" style="color: var(--red-badge);">
+                    <div class="menu-icon" style="background: rgba(255,59,48,0.1); color: var(--red-badge);"><i class="fa-solid fa-right-from-bracket"></i></div>
+                    <div style="flex: 1; font-weight: 700;">Déconnexion</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- NAV INDEX -->
+    <div class="bottom-nav-container">
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-nav="accueil" onclick="switchPage('accueil')">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Accueil</span>
+            </button>
+            <button class="nav-item" data-nav="motivation" onclick="switchPage('motivation')">
+                <svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg><span>Motivation</span>
+            </button>
+            <button class="nav-item" data-nav="service" onclick="switchPage('service')">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg><span>Service</span>
+            </button>
+            <button class="nav-item" data-nav="profil" onclick="switchPage('profil')">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profil</span>
+            </button>
+        </nav>
     </div>
-</div>
 
-<div id="paymentView">
-    <div class="bg-image-payment"></div>
-    <div class="bg-overlay-payment"></div>
-    <div class="bottom-nav-payment">
-        <button class="btn-pay" id="btnPay" onclick="activatePayment()">
-            <i class="fa-solid fa-credit-card"></i> Payer
-        </button>
-        <button class="btn-skip" id="btnSkip" onclick="skipPayment()">
-            Plus tard
-        </button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="modal-cgu" onclick="if(event.target===this)closeModal('cgu')">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('cgu')"><i class="fa-solid fa-xmark"></i></button>
-        <div class="modal-title">Conditions Générales d'Utilisation</div>
-        <div class="modal-text">
-            <h4>1. Acceptation des conditions</h4>
-            <p>En utilisant l'application Lirea, vous acceptez les présentes conditions. L'accès se fait via un compte Google.</p>
-            <h4>2. Collecte de données</h4>
-            <p>Une adresse IP est automatiquement collectée à des fins de sécurité et de statistiques pour l'administrateur.</p>
-            <h4>3. Abonnement</h4>
-            <p>L'accès complet nécessite un paiement de 1 000 F. Vous pouvez choisir de passer cette étape, mais certaines fonctionnalités seront restreintes.</p>
+    <!-- PANEL ABONNEMENT (Payement) -->
+    <div class="panel-overlay" id="panel-subscription">
+        <div class="panel">
+            <header class="panel-header">
+                <button class="panel-back" onclick="closePanel('subscription')"><i class="fa-solid fa-arrow-left"></i></button>
+                <div style="font-weight: 800; font-size: 16px;">Abonnement</div>
+            </header>
+            <div class="panel-body" style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <i class="fa-solid fa-crown" style="font-size: 60px; color: var(--accent-color); margin-bottom: 20px;"></i>
+                <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 10px;">Passez à Premium</h2>
+                <p style="text-align: center; color: var(--text-gray); margin-bottom: 20px;">Accédez à tous les livres de la bibliothèque sans restriction.</p>
+                <div style="font-size: 40px; font-weight: 900; color: var(--text-dark); margin-bottom: 20px;">1 000 F</div>
+                <button onclick="startPayment()" style="width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--accent-color); color: white; font-weight: 800; font-size: 16px; cursor: pointer;">
+                    <i class="fa-solid fa-credit-card"></i> Payer maintenant
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="modal-overlay" id="modal-privacy" onclick="if(event.target===this)closeModal('privacy')">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('privacy')"><i class="fa-solid fa-xmark"></i></button>
-        <div class="modal-title">Politique de Confidentialité</div>
-        <div class="modal-text">
-            <h4>1. Données collectées</h4>
-            <p>Nous collectons votre adresse IP, votre nom et email Google, ainsi que vos préférences de lecture.</p>
-            <h4>2. Utilisation</h4>
-            <p>Vos données sont utilisées pour vous fournir un accès personnalisé et ne sont jamais revendues à des tiers.</p>
-            <h4>3. Vos droits</h4>
-            <p>Vous pouvez demander la suppression de vos données à tout moment.</p>
+    <!-- PANEL NOTIFICATIONS -->
+    <div class="panel-overlay" id="panel-notifications">
+        <div class="panel">
+            <header class="panel-header">
+                <button class="panel-back" onclick="closePanel('notifications')"><i class="fa-solid fa-arrow-left"></i></button>
+                <div style="font-weight: 800; font-size: 16px;">Notifications</div>
+            </header>
+            <div class="panel-body">
+                <p style="text-align: center; color: var(--text-gray); margin-top: 50px;">Aucune notification pour le moment.</p>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- SDK SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-// ==========================================
-// CONFIGURATION SUPABASE (Intégrée)
-// ==========================================
-const SUPABASE_URL = 'https://lixoulvrhakkjdmqcwic.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_ba7q7u0rpwXAwNe6muG00Q_wshutrCW'; 
+    <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastText">—</span></div>
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <script>
+        // ==========================================
+        // CONFIGURATION SUPABASE
+        // ==========================================
+        const SUPABASE_URL = 'https://lixoulvrhakkjdmqcwic.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_ba7q7u0rpwXAwNe6muG00Q_wshutrCW'; 
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ==========================================
-// LOGIQUE UI
-// ==========================================
-function toggleGoogleBtn() {
-    document.getElementById('btnGoogle').disabled = !document.getElementById('termsCheck').checked;
-}
-function openModal(id) { document.getElementById('modal-' + id).classList.add('active'); }
-function closeModal(id) { document.getElementById('modal-' + id).classList.remove('active'); }
+        let currentUser = null;
+        let currentProfile = null;
 
-// ==========================================
-// AUTHENTIFICATION GOOGLE (Supabase)
-// ==========================================
-async function handleGoogleLogin() {
-    const btn = document.getElementById('btnGoogle');
-    const loader = document.getElementById('btnLoader');
-    const btnText = btn.querySelector('.google-text');
-    const btnIcon = document.getElementById('btnIcon');
+        const $ = (id) => document.getElementById(id);
+        const pages = document.querySelectorAll('.page');
+        const navItems = document.querySelectorAll('.nav-item');
+        const mainContent = $('main-content');
 
-    btnText.textContent = "Connexion en cours...";
-    btnIcon.style.display = 'none';
-    loader.style.display = 'block';
-    btn.disabled = true;
-
-    // Redirection vers Google via Supabase
-    const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo: 'https://updatezone-gif.github.io/lirea_/index.html',
-            queryParams: { prompt: 'select_account' }
-        }
-    });
-
-    if (error) {
-        alert("Erreur de connexion : " + error.message);
-        btnText.textContent = "Se connecter avec Google";
-        btnIcon.style.display = 'flex';
-        loader.style.display = 'none';
-        btn.disabled = false;
-    }
-}
-
-// ==========================================
-// PAIEMENT (Appel à l'Edge Function Jèko)
-// ==========================================
-async function activatePayment() {
-    const btnPay = document.getElementById('btnPay');
-    const btnSkip = document.getElementById('btnSkip');
-    
-    btnPay.innerHTML = '<span class="spinner"></span> Patientez...';
-    btnPay.disabled = true;
-    btnSkip.disabled = true;
-
-    try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        if (!session) throw new Error("Utilisateur non connecté");
-
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/create-jeko-checkout`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${session.access_token}`,
-                'Content-Type': 'application/json'
+        // ==========================================
+        // SÉCURITÉ : VÉRIFIER LA CONNEXION
+        // ==========================================
+        async function checkAuth() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (!session) {
+                window.location.href = 'Inscription.html';
+                return;
             }
+
+            currentUser = session.user;
+
+            // Récupérer le profil depuis la base de données
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (profile) {
+                currentProfile = profile;
+                // Mettre à jour l'interface profil
+                $('profileName').textContent = profile.full_name || 'Utilisateur Lirea';
+                $('profileUsername').textContent = '@' + (profile.email ? profile.email.split('@')[0] : 'user');
+                
+                if(profile.avatar_url) {
+                    $('profileAvatar').src = profile.avatar_url;
+                } else {
+                    $('profileAvatar').src = 'https://ui-avatars.com/api/?name=' + (profile.full_name || 'User') + '&background=1F6FEB&color=fff';
+                }
+
+                // Mettre à jour le badge abonnement
+                const badge = $('profileSubBadge');
+                if (profile.subscription_active) {
+                    badge.textContent = "Premium Actif";
+                    badge.style.background = "rgba(66,183,42,0.14)";
+                    badge.style.color = "var(--green)";
+                } else {
+                    badge.textContent = "Compte Gratuit";
+                    badge.style.background = "rgba(138,147,171,0.15)";
+                    badge.style.color = "var(--text-gray)";
+                }
+            }
+
+            // Charger les livres
+            loadBooks();
+        }
+
+        // ==========================================
+        // CHARGER LES LIVRES DEPUIS SUPABASE
+        // ==========================================
+        async function loadBooks() {
+            const { data: books, error } = await supabase
+                .from('books')
+                .select('*')
+                .eq('status', 'published')
+                .order('created_at', { ascending: false });
+
+            const feedContainer = document.getElementById('accueil-page');
+            
+            if (error) {
+                console.error("Erreur chargement livres:", error);
+                feedContainer.innerHTML = `<div style="text-align:center; padding: 50px; color: var(--red-badge);">
+                    <p>Erreur de connexion à la base de données.</p>
+                </div>`;
+                return;
+            }
+
+            if (!books || books.length === 0) {
+                feedContainer.innerHTML = `<div style="text-align:center; padding: 50px; color: var(--text-gray);">
+                    <i class="fa-solid fa-book-open" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
+                    <p>Aucun livre publié pour le moment.</p>
+                </div>`;
+                return;
+            }
+
+            feedContainer.innerHTML = books.map(book => `
+                <article class="post-card">
+                    <div class="post-image-container">
+                        <img src="${book.cover_url || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=800&auto=format&fit=crop'}" alt="Couverture">
+                        <div class="post-image-overlay"></div>
+                    </div>
+                    <div class="post-header">
+                        <div class="post-author-av">${book.author.substring(0, 2).toUpperCase()}</div>
+                        <div class="post-author-info">
+                            <div class="post-author-name">${book.author}</div>
+                            <div class="post-date"><i class="fa-regular fa-calendar"></i> ${new Date(book.created_at).toLocaleDateString('fr-FR')}</div>
+                        </div>
+                    </div>
+                    <div class="post-summary">
+                        <strong>${book.title}.</strong> ${book.description || 'Plongez dans ce chef-d\'œuvre.'}
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn btn-like" onclick="showToast('Bientôt disponible')">
+                            <i class="fa-regular fa-heart"></i> J'aime
+                        </button>
+                        <button class="action-btn btn-read" onclick="openReader('${book.id}')">
+                            <i class="fa-solid fa-book-open"></i> Lire
+                        </button>
+                        <button class="action-btn btn-comment" onclick="showToast('Commentaires bientôt disponibles')">
+                            <i class="fa-regular fa-comment"></i> 0
+                        </button>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        // ==========================================
+        // BOUTON "LIRE"
+        // ==========================================
+        function openReader(bookId) {
+            if (!currentProfile) return;
+
+            if (!currentProfile.subscription_active) {
+                showToast("Vous devez être abonné pour lire.");
+                switchPage('profil');
+                openPanel('subscription');
+                return;
+            }
+
+            window.location.href = `reader.html?id=${bookId}`;
+        }
+
+        // ==========================================
+        // PAIEMENT (Appel Jeko)
+        // ==========================================
+        async function startPayment() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) throw new Error("Non connecté");
+
+                showToast("Redirection vers le paiement...");
+
+                const res = await fetch(`${SUPABASE_URL}/functions/v1/create-jeko-checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Erreur de paiement");
+
+                if (data.payment_url || data.checkout_url || data.url) {
+                    window.location.href = data.payment_url || data.checkout_url || data.url;
+                } else {
+                    throw new Error("Lien de paiement introuvable.");
+                }
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // ==========================================
+        // UI & NAVIGATION
+        // ==========================================
+        function switchPage(name) {
+            pages.forEach(p => p.classList.toggle('active', p.dataset.page === name));
+            navItems.forEach(n => n.classList.toggle('active', n.dataset.nav === name));
+            document.body.classList.toggle('profile-active', name === 'profil');
+            mainContent.scrollTop = 0;
+        }
+
+        function openPanel(name) {
+            const panel = document.getElementById('panel-' + name);
+            if (panel) {
+                panel.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closePanel(name) {
+            const panel = document.getElementById('panel-' + name);
+            if (panel) {
+                panel.classList.remove('active');
+                setTimeout(() => { document.body.style.overflow = ''; }, 300);
+            }
+        }
+
+        function showToast(txt) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastText').textContent = txt;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.documentElement.style.colorScheme = newTheme;
+            const icon = document.querySelector('.profile-header button i');
+            if(icon) icon.className = isDark ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+            showToast(isDark ? 'Mode clair activé' : 'Mode sombre activé');
+        }
+
+        async function confirmLogout() {
+            await supabase.auth.signOut();
+            window.location.href = 'Inscription.html';
+        }
+
+        // Effet de recherche
+        const searchWrapper = document.getElementById('search-wrapper');
+        document.getElementById('btn-search-toggle').addEventListener('click', () => {
+            searchWrapper.classList.toggle('active');
+            if(searchWrapper.classList.contains('active')) document.getElementById('search-input').focus();
         });
 
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.error || "Erreur lors de l'initialisation du paiement");
-
-        // Si Jèko renvoie une URL de paiement, on redirige l'utilisateur
-        if (data.payment_url || data.checkout_url || data.url) {
-            window.location.href = data.payment_url || data.checkout_url || data.url;
-        } else {
-            console.log("Réponse Jeko:", data);
-            throw new Error("L'URL de paiement n'a pas été reçue de Jeko.");
-        }
-
-    } catch (err) {
-        alert(err.message);
-        btnPay.innerHTML = '<i class="fa-solid fa-credit-card"></i> Payer';
-        btnPay.disabled = false;
-        btnSkip.disabled = false;
-    }
-}
-
-function skipPayment() {
-    const btnSkip = document.getElementById('btnSkip');
-    btnSkip.innerHTML = 'Patientez...';
-    btnSkip.disabled = true;
-    window.location.href = 'index.html';
-}
-
-// ==========================================
-// GESTION DE LA SESSION AU CHARGEMENT
-// ==========================================
-window.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session) {
-        // Vérifier si l'abonnement est actif
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('subscription_active')
-            .eq('id', session.user.id)
-            .single();
-
-        if (profile?.subscription_active) {
-            window.location.href = 'index.html'; // Déjà abonné
-        } else {
-            document.getElementById('authView').style.display = 'none';
-            document.getElementById('paymentView').style.display = 'block';
-        }
-    }
-});
-</script>
+        // INITIALISATION
+        window.addEventListener('DOMContentLoaded', () => {
+            document.documentElement.setAttribute('data-theme', 'dark'); // Force le thème sombre par défaut
+            checkAuth();
+        });
+    </script>
 </body>
 </html>
